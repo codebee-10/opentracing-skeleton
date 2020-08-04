@@ -11,16 +11,3 @@ docker run \
 jaegertracing/all-in-one:latest
 ```
 
-### init trace
-
-
-### spanContext 传递
-
-
-### reporter 定义
-
-
-### http.Handler
-
-
-### rpc.Handler
