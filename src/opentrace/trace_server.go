@@ -139,7 +139,8 @@ func addReqTracer(r *http.Request) {
 	}
 
 	//上下文记录父spanContext
-	ctxShare = context.WithValue(context.Background(), "usergRpcCtx", opentracing.ContextWithSpan(context.Background(), sp))
+	ctxShare = context.WithValue(context.Background(), "usergRpcCtx", 
+        opentracing.ContextWithSpan(context.Background(), sp))
 	defer sp.Finish()
 }
 

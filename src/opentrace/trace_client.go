@@ -3,8 +3,6 @@ import (
 	"fmt"
 	"io"
 	opentracing "github.com/opentracing/opentracing-go"
-	// "github.com/opentracing/opentracing-go/ext"
-	// metadata "google.golang.org/grpc/metadata"
 	"github.com/opentracing/opentracing-go/log"
 	jaeger "github.com/uber/jaeger-client-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
