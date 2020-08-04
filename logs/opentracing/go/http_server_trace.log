@@ -1,0 +1,36 @@
+2020-08-02T21:48:17.891+0800	INFO	opentrace/jaeger_server.go:136	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[16bd98aac0be933f:16bd98aac0be933f:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-02T23:35:21.098+0800	ERROR	opentrace/jaeger_server.go:149	ListenAndServe err	{"error": "listen tcp 0.0.0.0:10030: bind: address already in use"}
+2020-08-02T23:35:33.713+0800	ERROR	opentrace/jaeger_server.go:149	ListenAndServe err	{"error": "listen tcp 0.0.0.0:10030: bind: address already in use"}
+2020-08-02T23:36:13.153+0800	INFO	opentrace/jaeger_server.go:136	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[22bb227fa11d0ae5:22bb227fa11d0ae5:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T00:24:28.265+0800	ERROR	opentrace/jaeger_server.go:186	ListenAndServe err	{"error": "listen tcp 0.0.0.0:10030: bind: address already in use"}
+2020-08-03T00:24:48.538+0800	INFO	opentrace/jaeger_server.go:146	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[3444d74aee4d4f13:3444d74aee4d4f13:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T10:45:26.203+0800	INFO	opentrace/jaeger_server.go:238	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[116df8febf837a04:116df8febf837a04:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T10:46:18.445+0800	INFO	opentrace/jaeger_server.go:238	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[318cba851d67a8f8:318cba851d67a8f8:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T10:55:47.059+0800	INFO	opentrace/jaeger_server.go:239	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[5325ddf633677a84:5325ddf633677a84:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T10:59:47.356+0800	INFO	opentrace/jaeger_server.go:240	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[18482be4776a9311:18482be4776a9311:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T11:07:07.566+0800	INFO	opentrace/jaeger_server.go:242	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[6043cebaa760e5d1:6043cebaa760e5d1:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T11:08:44.958+0800	INFO	opentrace/jaeger_server.go:243	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[7261cbb00b0d3e19:7261cbb00b0d3e19:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T11:09:43.485+0800	INFO	opentrace/jaeger_server.go:243	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[3067108dd302120b:3067108dd302120b:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T11:11:15.944+0800	INFO	opentrace/jaeger_server.go:243	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[2917d3b0237110f5:2917d3b0237110f5:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T14:23:21.154+0800	INFO	opentrace/jaeger_server.go:235	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[13ff45f510915f87:13ff45f510915f87:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T14:25:06.278+0800	INFO	opentrace/jaeger_server.go:237	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[2ad9ada5fd0fe19c:2ad9ada5fd0fe19c:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T19:04:31.639+0800	INFO	opentrace/jaeger_server.go:239	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[4ae429dc5cdc2795:4ae429dc5cdc2795:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T19:09:19.146+0800	INFO	opentrace/jaeger_server.go:244	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[727ad8039b696667:727ad8039b696667:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T19:13:06.887+0800	INFO	opentrace/jaeger_server.go:240	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[3d63269d2d137acb:3d63269d2d137acb:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T19:14:29.634+0800	INFO	opentrace/jaeger_server.go:244	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[5cbfb5698459612e:5cbfb5698459612e:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T19:15:36.943+0800	INFO	opentrace/jaeger_server.go:246	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[74e3f24e4401bf60:74e3f24e4401bf60:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T19:19:11.982+0800	INFO	opentrace/jaeger_server.go:241	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[5e9dbc78aefc7707:5e9dbc78aefc7707:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T19:20:21.532+0800	INFO	opentrace/jaeger_server.go:241	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[6f3cc449d5ef92ec:6f3cc449d5ef92ec:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T19:21:05.247+0800	INFO	opentrace/jaeger_server.go:241	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[02e15d0e5db4937a:02e15d0e5db4937a:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T19:22:34.944+0800	INFO	opentrace/jaeger_server.go:241	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[28be3ffbd8ee181d:28be3ffbd8ee181d:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T19:25:16.109+0800	INFO	opentrace/jaeger_server.go:240	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[5e6be9496688c398:5e6be9496688c398:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T19:32:08.010+0800	INFO	opentrace/jaeger_server.go:237	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[3899979d9818eabb:3899979d9818eabb:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-03T19:32:08.011+0800	INFO	opentrace/jaeger_server.go:240	httpRequest ....
+2020-08-03T19:32:08.011+0800	INFO	opentrace/jaeger_server.go:199	jaegerGrpcClientInterceptor ctx	{"parent spanContext": "context.Background.WithValue(type opentracing.contextKey, val 3899979d9818eabb:6737e2627f61e9c0:3899979d9818eabb:1)"}
+2020-08-03T19:32:08.014+0800	INFO	opentrace/jaeger_server.go:168	Greeting	{"message": "Hello ethan"}
+2020-08-03T19:32:08.014+0800	INFO	opentrace/jaeger_server.go:244	grpcRequest ....
+2020-08-04T00:55:12.551+0800	INFO	opentrace/jaeger_server.go:236	server req header	{"request headers": "map[Accept-Encoding:[gzip] Uber-Trace-Id:[52c44468529640e8:52c44468529640e8:0000000000000000:1] User-Agent:[Go-http-client/1.1]]"}
+2020-08-04T00:55:12.552+0800	INFO	opentrace/jaeger_server.go:239	httpRequest ....
+2020-08-04T00:55:12.552+0800	INFO	opentrace/jaeger_server.go:199	jaegerGrpcClientInterceptor ctx	{"parent spanContext": "context.Background.WithValue(type opentracing.contextKey, val 52c44468529640e8:2b566b047d0c4ef0:52c44468529640e8:1)"}
+2020-08-04T00:55:12.555+0800	INFO	opentrace/jaeger_server.go:168	Greeting	{"message": "Hello ethan"}
+2020-08-04T00:55:12.555+0800	INFO	opentrace/jaeger_server.go:243	grpcRequest ....
