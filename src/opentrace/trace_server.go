@@ -3,7 +3,8 @@ import (
 	"fmt"
 	"io"
     opentracing "github.com/opentracing/opentracing-go"
-    jaegertrace "libs/trace/jaeger"
+    httpTraceWrapper "libs/trace/wrapper/http"
+    rpcTraceWrapper "libs/trace/wrapper/rpc"
     "go.uber.org/zap"
     zaplog "libs/log"
     pb "src/opentrace/grpc/helloworld/output/github.com/grpc/example/helloworld"
@@ -19,6 +20,7 @@ var logger *zap.Logger
 var tracer opentracing.Tracer
 var closer io.Closer
 var ctxShare context.Context
+var serviceName string
 
 
 const (
@@ -31,13 +33,24 @@ const (
 func init() {
 	//init log
 	logger = zaplog.InitLogger()
+    serviceName = "API Gateway"
     //init tracer
-    tracer, closer = jaegertrace.InitJaeger("API Gateway")
+    // tracer, closer = jaegertrace.InitJaeger("API Gateway")
+}
+
+//addHttpTrace
+func addHttpTrace(r *http.Request) (opentracing.Tracer){
+    tracer = httpTraceWrapper.AddJaegerTracer(r, serviceName)
+    return tracer
+}
+
+func addRpcTrace() grpc.DialOption{
+    return rpcTraceWrapper.AddJaegerTracer(serviceName)
 }
 
 //grpc request
-func getUserListRpcRequest(tracer opentracing.Tracer) {
-    conn, err := grpc.Dial(address, grpc.WithInsecure(),jaegertrace.ClientDialOption(tracer))
+func getUserListRpcRequest(tracerOption grpc.DialOption) {
+    conn, err := grpc.Dial(address, grpc.WithInsecure(), tracerOption)
     if err != nil {
         logger.Error("did not connect", zap.Error(err))
     }
@@ -62,14 +75,12 @@ func getUserListRpcRequest(tracer opentracing.Tracer) {
 //getUserList
 func getUserList(w http.ResponseWriter, r *http.Request) {
 	logger.Info("server req header", zap.String("request headers", fmt.Sprintf("%s", r.Header)))
-	//http request
-	jaegertrace.AddReqTracer(r, tracer)
-	logger.Info("httpRequest ....")
 
-	//get user list rpc request
-	getUserListRpcRequest(tracer)
-
+    addHttpTrace(r)
+	//user list rpc request
+    getUserListRpcRequest(addRpcTrace())
 	logger.Info("grpcRequest ....")
+
 	io.WriteString(w, "get request")
 }
 

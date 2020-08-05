@@ -85,7 +85,7 @@ func WriteSubSpan(span opentracing.Span) {
 }
 
 // TracerWrapper tracer wrapper
-func AddReqTracer(r *http.Request, tracer opentracing.Tracer) {
+func AddTracer(r *http.Request, tracer opentracing.Tracer) {
 	opentracing.InitGlobalTracer(tracer)
 	sp := tracer.StartSpan(r.URL.Path)
 	spanCtx, _ := opentracing.GlobalTracer().Extract(opentracing.HTTPHeaders, 
@@ -103,8 +103,7 @@ func AddReqTracer(r *http.Request, tracer opentracing.Tracer) {
 	}
 
 	//上下文记录父spanContext
-	ctxShare = context.WithValue(context.Background(), "usergRpcCtx", 
-        opentracing.ContextWithSpan(context.Background(), sp))
+	ctxShare = context.WithValue(context.Background(), "usergRpcCtx", opentracing.ContextWithSpan(context.Background(), sp))
 
 	defer sp.Finish()
 }
@@ -139,6 +138,7 @@ func grpcClientInterceptor (
     if v := ctx.Value("usergRpcCtx"); v == nil {
     	ctx = ctxShare.Value("usergRpcCtx").(context.Context)
     	logger.Info("jaegerGrpcClientInterceptor ctx", zap.String("parent spanContext", fmt.Sprintf("%s", ctx)))
+        fmt.Println("jaeger trace rpc parent ctx ...", ctx)
     }
 
     var parentContext opentracing.SpanContext

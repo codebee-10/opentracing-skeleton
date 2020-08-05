@@ -1,23 +1,27 @@
 package main
 import (
 	"fmt"
-	"io"
 	"go.uber.org/zap"
 	zaplog "libs/log"	
 	"net/http"
 	"io/ioutil"
-	opentracing "github.com/opentracing/opentracing-go"
-	jaegertrace "libs/trace/jaeger"
+	// opentracing "github.com/opentracing/opentracing-go"
+	httpTraceWrapper "libs/trace/wrapper/http"
 )
 
 var logger *zap.Logger
-var tracer opentracing.Tracer
-var closer io.Closer
+// var tracer opentracing.Tracer
+// var closer io.Closer
 
 //init
 func init() {
 	//init log
 	logger = zaplog.InitLogger()
+}
+
+//addHttpTrace
+func addHttpTrace(r *http.Request) {
+	httpTraceWrapper.AddJaegerTracer(r, "API Client")
 }
 
 //getUserListRequest
@@ -26,9 +30,7 @@ func getUserListRequest() string{
 	httpClient := &http.Client{}
     r, _ := http.NewRequest("GET", apiUrl, nil)
     //add trace
-    tracer, closer = jaegertrace.InitJaeger("API Client")
-    defer closer.Close()
-   	jaegertrace.AddReqTracer(r, tracer)
+    addHttpTrace(r)
 
     response, _ := httpClient.Do(r)
     logger.Info("header....", zap.String("header string", fmt.Sprintf("%s", r.Header)))

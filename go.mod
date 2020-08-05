@@ -19,7 +19,7 @@ require (
 	google.golang.org/genproto v0.0.0-20200731012542-8145dea6a485 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 	libs/log v0.0.0-00010101000000-000000000000 // indirect
-	libs/trace/jaeger v0.0.0-00010101000000-000000000000 // indirect
+	libs/trace v0.0.0-00010101000000-000000000000 // indirect
 	src/opentrace/grpc/helloworld v0.0.0-00010101000000-000000000000 // indirect
 )
 
@@ -27,4 +27,4 @@ replace src/opentrace/grpc/helloworld => ./src/opentrace/grpc/helloworld/
 
 replace libs/log => ./libs/log
 
-replace libs/trace/jaeger => ./libs/trace/jaeger
+replace libs/trace => ./libs/trace
