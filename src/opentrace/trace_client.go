@@ -21,7 +21,8 @@ func init() {
 
 //addHttpTrace
 func addHttpTrace(r *http.Request) {
-	httpTraceWrapper.AddJaegerTracer(r, "API Client")
+	// httpTraceWrapper.AddJaegerTracer(r, "API Client")
+	httpTraceWrapper.AddZipkinTracer(r, "API Client2")
 }
 
 //getUserListRequest
