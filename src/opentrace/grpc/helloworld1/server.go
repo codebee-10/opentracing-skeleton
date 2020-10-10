@@ -12,21 +12,13 @@ import (
     "google.golang.org/grpc"
     pb "src/opentrace/grpc/helloworld/output/github.com/grpc/example/helloworld"
     "google.golang.org/grpc/reflection"
-    logger "github.com/roancsu/traceandtrace-go/libs/log"
     "fmt"
-    "time"
 )
  
 const (
-    port = ":50050"
-    addr     = "localhost:50051"
-    serviceName = "rpc:server:client"
-    traceAgentHost = "127.0.0.1:6831"
+    port = ":50051"
+    serviceName = "rpc:server1:client"
 )
-
-var tracer opentracing.Tracer
-var ctxShare context.Context
-var rpcCtx string
  
 // server is used to implement helloworld.GreeterServer.
 type server struct{}
@@ -64,16 +56,6 @@ type TextMapReader struct {
     metadata.MD
 }
 
-type TextMapWriter struct {
-    metadata.MD
-}
-
-
-func (t TextMapWriter) Set(key, val string) {
-    //key = strings.ToLower(key)
-    t.MD[key] = append(t.MD[key], val)
-}
-
 
 //读取metadata中的span信息
 func (t TextMapReader) ForeachKey(handler func(key, val string) error) error { //不能是指针
@@ -85,12 +67,6 @@ func (t TextMapReader) ForeachKey(handler func(key, val string) error) error { /
         }
     }
     return nil
-}
-
-
-func clientDialOption(parentTracer opentracing.Tracer) grpc.DialOption {
-    tracer = parentTracer
-    return grpc.WithUnaryInterceptor(jaegerGrpcClientInterceptor)
 }
 
 
@@ -118,82 +94,9 @@ func jaegerGrpcServerInterceptor(
     defer span.Finish()
     fmt.Println(span)
     ctx = opentracing.ContextWithSpan(ctx, span)
-    rpcCtx = serviceName+"ctx"
-    ctxShare = context.WithValue(context.Background(), rpcCtx, opentracing.ContextWithSpan(context.Background(), span))
-    rpcRequest(tracer)
  
     return handler(ctx, req)
 }
-
-
-func jaegerGrpcClientInterceptor (
-    ctx context.Context, 
-    method string, 
-    req, reply interface{},
-    cc *grpc.ClientConn, 
-    invoker grpc.UnaryInvoker, 
-    opts ...grpc.CallOption) (err error) {
-
-    if rpcCtx != "" {
-        if v := ctx.Value(rpcCtx); v == nil {
-            ctx = ctxShare.Value(rpcCtx).(context.Context)
-            logger.Info(fmt.Sprintf("trace rpc parent ctx ... %v\n", ctx))
-        }
-    }
-
-    //从context中获取metadata。md.(type) == map[string][]string
-    md, ok := metadata.FromIncomingContext(ctx)
-    if !ok {
-        md = metadata.New(nil)
-    } else {
-        //如果对metadata进行修改，那么需要用拷贝的副本进行修改。（FromIncomingContext的注释）
-        md = md.Copy()
-    }
-    //定义一个carrier，下面的Inject注入数据需要用到。carrier.(type) == map[string]string
-    //carrier := opentracing.TextMapCarrier{}
-    carrier := TextMapWriter{md}
-
-    var currentContext opentracing.SpanContext
-    //从context中获取原始的span
-    parentSpan := opentracing.SpanFromContext(ctx)
-    if parentSpan != nil {
-        currentContext = parentSpan.Context()
-    }else{
-        //start span
-        span := tracer.StartSpan(method)
-        defer span.Finish()
-        currentContext = span.Context()
-    }
-
-    //将span的context信息注入到carrier中
-    e := tracer.Inject(currentContext, opentracing.TextMap, carrier)
-    if e != nil {
-        fmt.Println("tracer Inject err,", e)
-    }
-    //创建一个新的context，把metadata附带上
-    ctx = metadata.NewOutgoingContext(ctx, md)
- 
-    return invoker(ctx, method, req, reply, cc, opts...)
-}
-
-
-
-func rpcRequest(tracer opentracing.Tracer) {
-    // dial
-    conn, err := grpc.Dial(addr, grpc.WithInsecure(), clientDialOption(tracer))
-    if err != nil {
-    }
-    //发送请求
-    name := "ethan"
-    ctx, _ := context.WithTimeout(context.Background(), time.Second)
-    c := pb.NewGreeterClient(conn)
-    r, err := c.SayHello(ctx, &pb.HelloRequest{Name: name})
-    if err != nil {
-        logger.Error(fmt.Sprintf("could not greet %s", err))
-    }
-    fmt.Println("Greeting: %s", r.Message)
-}
-
 
 
 func main() {
@@ -217,14 +120,5 @@ func main() {
     if err := s.Serve(lis); err != nil {
         log.Fatalf("failed to serve: %v", err)
     }
-
-    fmt.Println("okk...")
 }
  
-
-
-
-
-
-
-

@@ -2,24 +2,28 @@ package trace
 
 import (
 	"google.golang.org/grpc"
-    jaegertrace "libs/trace/reporter/jaeger"
+    jaegertrace "opentracing-skeleton/libs/trace/reporter/jaeger"
     "net/http"
+    "io"
 )
 
 
 //jaeger
-func AddJaegerTracer(serviceName string) grpc.DialOption {
-    tracer, _ := jaegertrace.InitJaeger(serviceName)
-    // defer closer.Close()
-    return jaegertrace.ClientDialOption(tracer)
+func AddJaegerTracer(serviceName string) (grpc.DialOption, io.Closer) {
+    tracer, closer := jaegertrace.InitJaeger(serviceName)
+    return jaegertrace.ClientDialOption(tracer), closer
 }
+
 
 //zipkin
 func AddZipkinTracer(r *http.Request, serviceName string) {
     //TO-DO
 }
 
+
 //skywalking
 func AddSkyWalkingTracer(r *http.Request, serviceName string) {
     //TO-DO
 }
+
+ 

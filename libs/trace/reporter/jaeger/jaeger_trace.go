@@ -8,8 +8,8 @@ import (
     "google.golang.org/grpc"
     "google.golang.org/grpc/metadata"
     "golang.org/x/net/context"
-    zaplog "libs/log"
-    "go.uber.org/zap"
+    logger "github.com/roancsu/traceandtrace-go/libs/log"
+    "os"
     "io"
     "net/http"
     "fmt"
@@ -17,37 +17,29 @@ import (
 
 
 var tracer opentracing.Tracer
-// var closer io.Closer
 var ctxShare context.Context
-var logger *zap.Logger
-
+var rpcCtx string
 var sf = 100
 
-const (
-    address     = "localhost:50051"
-    defaultName = "ethan"
-)
 
-//init
-func init() {
-    //init log
-    logger = zaplog.InitLogger()
-}
-
-// init Jaeger
+//初始化 Jaeger
 func InitJaeger(service string) (opentracing.Tracer, io.Closer) {
 	cfg, err := jaegercfg.FromEnv()
 	cfg.Sampler.Type = "const"
 	cfg.Sampler.Param = 1
 	cfg.Reporter.LocalAgentHostPort = "127.0.0.1:6831"
+	if agentHost := os.Getenv("TRACE_AGENT_HOST"); agentHost!="" {
+		cfg.Reporter.LocalAgentHostPort = agentHost
+	}
 	cfg.Reporter.LogSpans = true
-	
 	tracer, closer, err := cfg.New(service, jaegercfg.Logger(jaeger.StdLogger))
 	if err != nil {
-		panic(fmt.Sprintf("ERROR: cannot init Jaeger: %v\n", err))
+		logger.Error(fmt.Sprintf("cannot init Jaeger: %v\n", err))
 	}
+	opentracing.SetGlobalTracer(tracer)
 	return tracer, closer
 }
+
 
 //log trace
 func LogTrace(span opentracing.Span) {
@@ -61,52 +53,59 @@ func LogTrace(span opentracing.Span) {
 	)
 }
 
+
 //baggage trace
 func BaggageTrace(span opentracing.Span) {
 	traceStr := "trace awesome thing"
 	//use baggage
-	// set
+	//set
 	span.SetBaggageItem("greeting", traceStr)
-	// get
+	//get
 	greeting := span.BaggageItem("greeting")
-	fmt.Println(greeting)
+	logger.Info(fmt.Sprintf("greeting: %v\n", greeting))
 }
 
+
 //write sub span
-func WriteSubSpan(span opentracing.Span) {
+func WriteSubSpan(span opentracing.Span, subSpanName string) {
 	//use context
 	ctx := context.Background()
 	ctx = opentracing.ContextWithSpan(ctx, span)
-
-	// 其他过程获取并开始子 span
-	newSpan, _ := opentracing.StartSpanFromContext(ctx, "sub span")
-	// StartSpanFromContext 会将新span保存到ctx中更新
+	//其他过程获取并开始子 span
+	newSpan, _ := opentracing.StartSpanFromContext(ctx, subSpanName)
+	//StartSpanFromContext 会将新span保存到ctx中更新
 	defer newSpan.Finish()
 }
+
 
 // TracerWrapper tracer wrapper
 func AddTracer(r *http.Request, tracer opentracing.Tracer) {
 	opentracing.InitGlobalTracer(tracer)
-	sp := tracer.StartSpan(r.URL.Path)
+	var sp opentracing.Span
 	spanCtx, _ := opentracing.GlobalTracer().Extract(opentracing.HTTPHeaders, 
 		opentracing.HTTPHeadersCarrier(r.Header))
 	if spanCtx != nil {
 		sp = opentracing.GlobalTracer().StartSpan(r.URL.Path, opentracing.ChildOf(spanCtx))
+		logger.Error(fmt.Sprintf("parent ....: %v\n", r.URL.Path))
 	}else{
-		//http inject
-		if err := opentracing.GlobalTracer().Inject(
-			sp.Context(),
-			opentracing.HTTPHeaders,
-			opentracing.HTTPHeadersCarrier(r.Header)); err != nil {
-			logger.Error("inject error ...", zap.Error(err))
-		}
+		sp = tracer.StartSpan(r.URL.Path)
+		logger.Error(fmt.Sprintf("new ....: %v\n", r.URL.Path))
+	}
+	//注入span
+	if err := opentracing.GlobalTracer().Inject(
+		sp.Context(),
+		opentracing.HTTPHeaders,
+		opentracing.HTTPHeadersCarrier(r.Header)); err != nil {
+        logger.Error(fmt.Sprintf("inject failed ...: %v\n", err))
 	}
 
 	//上下文记录父spanContext
-	ctxShare = context.WithValue(context.Background(), "usergRpcCtx", opentracing.ContextWithSpan(context.Background(), sp))
-
+	rpcCtx = r.URL.Path
+	ctxShare = context.WithValue(context.Background(), rpcCtx, opentracing.ContextWithSpan(context.Background(), sp))
+    //close span
 	defer sp.Finish()
 }
+
 
 //client 
 func ClientDialOption(parentTracer opentracing.Tracer) grpc.DialOption {
@@ -114,16 +113,6 @@ func ClientDialOption(parentTracer opentracing.Tracer) grpc.DialOption {
     return grpc.WithUnaryInterceptor(grpcClientInterceptor)
 }
 
-//text map writer
-type TextMapWriter struct {
-    metadata.MD
-}
-
-//text map writer set
-func (t TextMapWriter) Set(key, val string) {
-    //key = strings.ToLower(key)
-    t.MD[key] = append(t.MD[key], val)
-}
 
 //grpcClientInterceptor
 func grpcClientInterceptor (
@@ -135,42 +124,58 @@ func grpcClientInterceptor (
     opts ...grpc.CallOption) (err error) {
 
     //上下文获取spanContext
-    if v := ctx.Value("usergRpcCtx"); v == nil {
-    	ctx = ctxShare.Value("usergRpcCtx").(context.Context)
-    	logger.Info("jaegerGrpcClientInterceptor ctx", zap.String("parent spanContext", fmt.Sprintf("%s", ctx)))
-        fmt.Println("jaeger trace rpc parent ctx ...", ctx)
+    if rpcCtx != "" {
+    	if v := ctx.Value(rpcCtx); v == nil {
+	    	ctx = ctxShare.Value(rpcCtx).(context.Context)
+	        logger.Info(fmt.Sprintf("trace rpc parent ctx ... %v\n", ctx))
+	    }
     }
 
-    var parentContext opentracing.SpanContext
-    //从context中获取原始的span
-    parentSpan := opentracing.SpanFromContext(ctx)
-    if parentSpan != nil {
-        parentContext = parentSpan.Context()
-    }
-
-    span := tracer.StartSpan(method, opentracing.ChildOf(parentContext))
-    defer span.Finish()
-    //从context中获取metadata。md.(type) == map[string][]string
+    //从context中获取metadata
     md, ok := metadata.FromIncomingContext(ctx)
     if !ok {
         md = metadata.New(nil)
     } else {
-        //如果对metadata进行修改，那么需要用拷贝的副本进行修改。（FromIncomingContext的注释）
+        //如果对metadata进行修改，那么需要用拷贝的副本进行修改
         md = md.Copy()
     }
-    //定义一个carrier，下面的Inject注入数据需要用到。carrier.(type) == map[string]string
     //carrier := opentracing.TextMapCarrier{}
     carrier := TextMapWriter{md}
+    //父类 context
+    var currentContext opentracing.SpanContext
+    //从context中获取原始的span
+    parentSpan := opentracing.SpanFromContext(ctx)
+    if parentSpan != nil {
+        currentContext = parentSpan.Context()
+    }else{
+    	//start span
+	    span := tracer.StartSpan(method)
+	    defer span.Finish()
+	    currentContext = span.Context()
+    }
+    
     //将span的context信息注入到carrier中
-    e := tracer.Inject(span.Context(), opentracing.TextMap, carrier)
+    e := tracer.Inject(currentContext, opentracing.TextMap, carrier)
     if e != nil {
-        logger.Error("tracer Inject err", zap.Error(e))
+        logger.Error(fmt.Sprintf("tracer inject failed ...: %v\n", e))
     }
     //创建一个新的context，把metadata附带上
     ctx = metadata.NewOutgoingContext(ctx, md)
- 
     return invoker(ctx, method, req, reply, cc, opts...)
 }
+
+
+//text map writer
+type TextMapWriter struct {
+    metadata.MD
+}
+
+
+//text map writer set
+func (t TextMapWriter) Set(key, val string) {
+    t.MD[key] = append(t.MD[key], val)
+}
+
 
 
 

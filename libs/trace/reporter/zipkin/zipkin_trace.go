@@ -7,42 +7,39 @@ import (
 	zipkinot "github.com/openzipkin-contrib/zipkin-go-opentracing"
 	"github.com/openzipkin/zipkin-go/reporter"
 	"golang.org/x/net/context"
-	"go.uber.org/zap"
-	zaplog "libs/log"
 	"net/http"
-	"log"
+	"fmt"
+	// "log"
 )
 
-var logger *zap.Logger
+
 var ctxShare context.Context
 var tracer opentracing.Tracer
 
-//init
-func init() {
-	 logger = zaplog.InitLogger()
-}
 
-//init zipkin
+//初始化 zipkin
 func InitZipkin(service string) (opentracing.Tracer, reporter.Reporter){
-	// set up a span reporter
+	//设置 span reporter
 	reporter := httpreporter.NewReporter("http://localhost:9411/api/v2/spans")
-	// create our local service endpoint
+	//创建本地 service 节点
 	endpoint, err := zipkin.NewEndpoint(service, "")
+	//log error
 	if err != nil {
-		log.Fatalf("unable to create local endpoint: %+v\n", err)
+		fmt.Println("[traceandtrace] [Error] unable to create local endpoint ...", err)
 	}
-
-	// initialize our tracer
+	//初始化 tracer
 	nativeTracer, err := zipkin.NewTracer(reporter, zipkin.WithLocalEndpoint(endpoint))
 	if err != nil {
-		log.Fatalf("unable to create tracer: %+v\n", err)
+		fmt.Println("[traceandtrace] [Error] unable to create tracer ...", err)
 	}
-
+	//wrap tracer
 	tracer := zipkinot.Wrap(nativeTracer)
+	//返回 trace & reporter
 	return tracer, reporter
 }
 
-//add tracer
+
+//添加 tracer
 func AddTracer(r *http.Request, tracer opentracing.Tracer) {
 	opentracing.InitGlobalTracer(tracer)
 	sp := tracer.StartSpan(r.URL.Path)
@@ -56,13 +53,12 @@ func AddTracer(r *http.Request, tracer opentracing.Tracer) {
 			sp.Context(),
 			opentracing.HTTPHeaders,
 			opentracing.HTTPHeadersCarrier(r.Header)); err != nil {
-			logger.Error("inject error ...", zap.Error(err))
+			fmt.Println("[traceandtrace] [Error] inject failed ...", err)
 		}
 	}
-
 	//上下文记录父spanContext
 	ctxShare = context.WithValue(context.Background(), "usergRpcCtx", opentracing.ContextWithSpan(context.Background(), sp))
-
+	//close span
 	defer sp.Finish()
 }
 
